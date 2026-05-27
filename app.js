@@ -58,10 +58,13 @@ app.get('/health/ready', async (req, res) => {
 
 app.get('/items', async (req, res) => {
     try {
-        const { rows } = await pool.query('SELECT id, name FROM items');
+        // Додали quantity у SELECT
+        const { rows } = await pool.query('SELECT id, name, quantity FROM items');
         sendResponse(req, res, rows, (data) => {
-            const trs = data.map(i => `<tr><td>${i.id}</td><td>${i.name}</td></tr>`).join('');
-            return `<table border="1"><tr><th>ID</th><th>Name</th></tr>${trs}</table>`;
+            // Додали quantity у відображення рядків таблиці
+            const trs = data.map(i => `<tr><td>${i.id}</td><td>${i.name}</td><td>${i.quantity}</td></tr>`).join('');
+            // Додали заголовок Quantity у таблицю
+            return `<table border="1"><tr><th>ID</th><th>Name</th><th>Quantity</th></tr>${trs}</table>`;
         });
     } catch (err) {
         res.status(500).send('Server Error');
