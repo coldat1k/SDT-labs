@@ -1,0 +1,10 @@
+{
+  "port": 8000,
+  "db": {
+    "user": "app",
+    "host": "127.0.0.1",
+    "database": "cinema_db",
+    "password": "app_password",
+    "port": 5432
+  }
+}
