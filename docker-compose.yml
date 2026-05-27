@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: inventory_user
+      POSTGRES_PASSWORD: inventory_password
+      POSTGRES_DB: inventory_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - sdt_network
+    restart: unless-stopped
+
+  app:
+    build: .
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=inventory_user
+      - DB_PASSWORD=inventory_password
+      - DB_NAME=inventory_db
+      - PORT=8000
+    depends_on:
+      - db
+    networks:
+      - sdt_network
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - app
+    networks:
+      - sdt_network
+    restart: unless-stopped
+networks:
+  sdt_network:
+    driver: bridge
+volumes:
+  pgdata:
