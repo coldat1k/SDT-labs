@@ -1,10 +1,21 @@
 const { Pool } = require('pg');
 const fs = require('fs');
 
-const configPath = '/etc/mywebapp/config.json';
-const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+let config = { db: {} };
+try {
+    const configPath = fs.existsSync('/etc/mywebapp/config.json') ? '/etc/mywebapp/config.json' : './config.json';
+    config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+} catch (err) {
+    console.warn('Config file not found. Falling back to environment variables.');
+}
 
-const pool = new Pool(config.db);
+const pool = new Pool({
+    user: process.env.DB_USER || config.db.user,
+    host: process.env.DB_HOST || config.db.host,
+    database: process.env.DB_NAME || config.db.database,
+    password: process.env.DB_PASSWORD || config.db.password,
+    port: process.env.DB_PORT || config.db.port
+});
 
 const initDB = async () => {
     try {

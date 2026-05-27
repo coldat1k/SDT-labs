@@ -2,17 +2,22 @@ const express = require('express');
 const { Pool } = require('pg');
 const fs = require('fs');
 
-const configPath = './config.json';
-let config;
+let config = { db: {}, port: 8000 };
 try {
+    const configPath = fs.existsSync('/etc/mywebapp/config.json') ? '/etc/mywebapp/config.json' : './config.json';
     config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
 } catch (err) {
-    console.error('Failed to read config file. Exiting.');
-    process.exit(1);
+    console.warn('Config file not found. Falling back to environment variables.');
 }
 
 const app = express();
-const pool = new Pool(config.db);
+const pool = new Pool({
+    user: process.env.DB_USER || config.db.user,
+    host: process.env.DB_HOST || config.db.host,
+    database: process.env.DB_NAME || config.db.database,
+    password: process.env.DB_PASSWORD || config.db.password,
+    port: process.env.DB_PORT || config.db.port
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -94,6 +99,7 @@ app.post('/items', async (req, res) => {
     }
 });
 
-app.listen(config.port, '0.0.0.0', () => {
-    console.log(`Web app listening on 0.0.0.0:${config.port}`);
+const port = process.env.PORT || config.port;
+app.listen(port, '0.0.0.0', () => {
+    console.log(`Web app listening on 0.0.0.0:${port}`);
 });
