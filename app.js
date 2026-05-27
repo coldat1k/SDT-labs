@@ -2,7 +2,7 @@ const express = require('express');
 const { Pool } = require('pg');
 const fs = require('fs');
 
-const configPath = '/etc/mywebapp/config.json';
+const configPath = './config.json';
 let config;
 try {
     config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
@@ -94,6 +94,6 @@ app.post('/items', async (req, res) => {
     }
 });
 
-app.listen(config.port, '127.0.0.1', () => {
-    console.log(`Web app listening on 127.0.0.1:${config.port}`);
+app.listen(config.port, '0.0.0.0', () => {
+    console.log(`Web app listening on 0.0.0.0:${config.port}`);
 });
