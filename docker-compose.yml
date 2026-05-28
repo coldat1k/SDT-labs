@@ -1,44 +1,25 @@
+networks:
+  backend-net:
+    driver: bridge
+
+volumes:
+  pgdata:
+
 services:
   db:
     image: postgres:15-alpine
+    networks: [backend-net]
+    volumes: [pgdata:/var/lib/postgresql/data]
     environment:
-      POSTGRES_USER: inventory_user
-      POSTGRES_PASSWORD: inventory_password
-      POSTGRES_DB: inventory_db
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    networks:
-      - sdt_network
-    restart: unless-stopped
+      POSTGRES_PASSWORD: password
 
   app:
     build: .
-    environment:
-      - DB_HOST=db
-      - DB_PORT=5432
-      - DB_USER=inventory_user
-      - DB_PASSWORD=inventory_password
-      - DB_NAME=inventory_db
-      - PORT=8000
-    depends_on:
-      - db
-    networks:
-      - sdt_network
-    restart: unless-stopped
+    networks: [backend-net]
+    depends_on: [db]
 
   nginx:
     image: nginx:alpine
-    ports:
-      - "127.0.0.1:80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      - app
-    networks:
-      - sdt_network
-    restart: unless-stopped
-networks:
-  sdt_network:
-    driver: bridge
-volumes:
-  pgdata:
+    networks: [backend-net]
+    ports: ["80:80"]
+    depends_on: [app]

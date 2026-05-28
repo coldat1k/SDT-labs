@@ -1,6 +1,3 @@
-#!/bin/bash
-
-# Перевірка на виконання від імені root
 if [ "$EUID" -ne 0 ]; then
   echo "Будь ласка, запустіть скрипт з правами root (sudo ./setup.sh)"
   exit 1
